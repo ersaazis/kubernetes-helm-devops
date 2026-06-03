@@ -1,0 +1,10 @@
+apiVersion: v2
+name: external-secrets
+description: Production wrapper for External Secrets Operator with optional Vault sync bootstrap.
+type: application
+version: 0.1.0
+appVersion: "2.5.0"
+dependencies:
+  - name: external-secrets
+    version: 2.5.0
+    repository: https://charts.external-secrets.io

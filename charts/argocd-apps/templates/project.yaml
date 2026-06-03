@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: {{ .Values.argo.project.name }}
+  namespace: {{ .Values.argo.namespace }}
+  labels:
+    {{- include "argocd-apps.labels" . | nindent 4 }}
+spec:
+  description: {{ .Values.argo.project.description | quote }}
+  sourceRepos:
+    {{- if .Values.argo.project.sourceRepos }}
+    {{- toYaml .Values.argo.project.sourceRepos | nindent 4 }}
+    {{- else }}
+    - {{ .Values.argo.repoURL | quote }}
+    {{- end }}
+  destinations:
+    {{- $seen := dict -}}
+    {{- range $name := keys .Values.applications | sortAlpha }}
+    {{- $app := include "argocd-apps.applicationConfig" (dict "root" $ "app" (index $.Values.applications $name)) | fromYaml }}
+    {{- if $app.enabled }}
+    {{- $server := default $.Values.argo.destination.server $app.destinationServer }}
+    {{- $namespace := default (include "argocd-apps.normalize" $name) $app.namespace }}
+    {{- $key := printf "%s|%s" $server $namespace }}
+    {{- if not (hasKey $seen $key) }}
+    {{- $_ := set $seen $key true }}
+    - server: {{ $server | quote }}
+      namespace: {{ $namespace | quote }}
+    {{- end }}
+    {{- end }}
+    {{- end }}
+    {{- if .Values.argo.project.additionalDestinations }}
+    {{- toYaml .Values.argo.project.additionalDestinations | nindent 4 }}
+    {{- end }}
+  clusterResourceWhitelist:
+    {{- toYaml .Values.argo.project.clusterResourceWhitelist | nindent 4 }}
+  {{- if .Values.argo.project.namespaceResourceWhitelist }}
+  namespaceResourceWhitelist:
+    {{- toYaml .Values.argo.project.namespaceResourceWhitelist | nindent 4 }}
+  {{- end }}
+  orphanedResources:
+    warn: {{ .Values.argo.project.orphanedResources.warn }}
+

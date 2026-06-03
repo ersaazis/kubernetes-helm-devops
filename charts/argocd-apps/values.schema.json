@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "argo": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "namespace": { "type": "string" },
+        "repoURL": { "type": "string" },
+        "targetRevision": { "type": "string" },
+        "destination": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "server": { "type": "string" }
+          }
+        },
+        "project": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "name": { "type": "string" },
+            "description": { "type": "string" },
+            "sourceRepos": { "type": "array" },
+            "additionalDestinations": { "type": "array" },
+            "clusterResourceWhitelist": { "type": "array" },
+            "namespaceResourceWhitelist": { "type": "array" },
+            "orphanedResources": { "type": "object", "additionalProperties": true }
+          }
+        },
+        "syncPolicy": { "type": "object", "additionalProperties": true },
+        "revisionHistoryLimit": { "type": "integer", "minimum": 0 },
+        "defaultIgnoreDifferences": { "type": "array" },
+        "applicationDefaults": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "name": { "type": "string" },
+            "namespace": { "type": "string" },
+            "releaseName": { "type": "string" },
+            "syncWave": { "type": ["string", "number"] },
+            "project": { "type": "string" },
+            "destinationServer": { "type": "string" },
+            "annotations": { "type": "object", "additionalProperties": true },
+            "labels": { "type": "object", "additionalProperties": true },
+            "valueFiles": { "type": "array", "items": { "type": "string" } },
+            "requiredValueFiles": { "type": "array", "items": { "type": "string" } },
+            "ignoreDifferences": { "type": "array" },
+            "syncPolicy": { "type": "object", "additionalProperties": true }
+          }
+        }
+      },
+      "required": ["repoURL", "targetRevision", "project"]
+    },
+    "applications": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "enabled": { "type": "boolean" },
+          "name": { "type": "string" },
+          "chartPath": { "type": "string" },
+          "namespace": { "type": "string" },
+          "releaseName": { "type": "string" },
+          "syncWave": { "type": ["string", "number"] },
+          "project": { "type": "string" },
+          "destinationServer": { "type": "string" },
+          "annotations": { "type": "object", "additionalProperties": true },
+          "labels": { "type": "object", "additionalProperties": true },
+          "valueFiles": { "type": "array", "items": { "type": "string" } },
+          "requiredValueFiles": { "type": "array", "items": { "type": "string" } },
+          "ignoreDifferences": { "type": "array" },
+          "syncPolicy": { "type": "object", "additionalProperties": true }
+        },
+        "required": ["chartPath"]
+      }
+    }
+  },
+  "required": ["argo", "applications"]
+}

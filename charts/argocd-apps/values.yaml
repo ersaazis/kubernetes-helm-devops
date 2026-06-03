@@ -1,0 +1,73 @@
+argo:
+  namespace: argocd
+  repoURL: 'git@github.com:ersaazis/argocd_apps.git'
+  targetRevision: main
+  destination:
+    server: https://kubernetes.default.svc
+  project:
+    name: platform-prod
+    description: Production GitOps project for kubernetes-helm-config.
+    sourceRepos: []
+    additionalDestinations: []
+    clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+    namespaceResourceWhitelist: []
+    orphanedResources:
+      warn: true
+  syncPolicy:
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+    - CreateNamespace=true
+    - PrunePropagationPolicy=foreground
+    - ApplyOutOfSyncOnly=true
+    - ServerSideApply=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 10
+  defaultIgnoreDifferences:
+  - group: apps
+    kind: Deployment
+    jsonPointers:
+    - /spec/replicas
+  - group: apps
+    kind: StatefulSet
+    jsonPointers:
+    - /spec/replicas
+  applicationDefaults:
+    enabled: true
+    namespace: ''
+    releaseName: ''
+    syncWave: '0'
+    project: ''
+    destinationServer: ''
+    annotations: {}
+    labels: {}
+    valueFiles:
+    - values.production.yaml
+    requiredValueFiles:
+    - values.production.yaml
+    ignoreDifferences: []
+    syncPolicy: {}
+applications:
+  external-secrets:
+    chartPath: charts/external-secrets
+    namespace: external-secrets
+    syncWave: '-10'
+    valueFiles:
+    - values.production.yaml
+    - values.argocd.production.yaml
+    requiredValueFiles:
+    - values.production.yaml
+    - values.argocd.production.yaml
+
+
+

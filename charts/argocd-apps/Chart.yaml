@@ -1,0 +1,7 @@
+apiVersion: v2
+name: argocd-apps
+description: Argo CD AppProject and Application definitions for kubernetes-helm-config.
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+

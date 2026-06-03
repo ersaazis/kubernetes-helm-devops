@@ -1,0 +1,19 @@
+# AI generated folders/files
+.gemini/
+graphify-out/
+.graphify_*.json
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+GEMINI.md
+
+# Idea / VSCode
+.idea/
+.vscode/
+

@@ -1,0 +1,9 @@
+External Secrets Operator installed.
+
+CRDs are managed by the upstream chart when `external-secrets.installCRDs=true`.
+
+Optional bootstrap resources in this wrapper:
+- `vaultStore.*` -> creates `ClusterSecretStore` or `SecretStore`
+- `externalSecret.*` -> creates `ExternalSecret` that syncs into target Kubernetes `Secret`
+
+For first install, keep `vaultStore.enabled=false` and `externalSecret.enabled=false` until Vault details are ready.

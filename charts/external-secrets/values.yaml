@@ -1,0 +1,80 @@
+global:
+  defaultNamespace: external-secrets
+productionChecks:
+  enabled: false
+external-secrets:
+  installCRDs: true
+  createOperator: true
+  rbac:
+    create: true
+  serviceAccount:
+    create: true
+    name: ''
+  webhook:
+    create: true
+  certController:
+    create: true
+  serviceMonitor:
+    enabled: false
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+vaultStore:
+  enabled: false
+  kind: ClusterSecretStore
+  name: hcp-vault
+  namespace: ''
+  provider:
+    server: https://vault.example.com
+    path: secret
+    version: v2
+    namespace: ''
+    caBundle: ''
+  auth:
+    kubernetes:
+      mountPath: kubernetes
+      role: external-secrets
+      serviceAccountRef:
+        name: external-secrets
+        namespace: external-secrets
+vaultStoreApps:
+  enabled: false
+  kind: ClusterSecretStore
+  name: hcp-vault-apps
+  namespace: ''
+  provider:
+    server: https://vault.example.com
+    path: secret
+    version: v2
+    namespace: ''
+    caBundle: ''
+  auth:
+    kubernetes:
+      mountPath: kubernetes
+      role: external-secrets
+      serviceAccountRef:
+        name: external-secrets
+        namespace: external-secrets
+
+externalSecret:
+  enabled: false
+  name: app-secret-sync
+  namespace: default
+  refreshInterval: 1h
+  secretStoreRef:
+    name: hcp-vault
+    kind: ClusterSecretStore
+  target:
+    name: app-secret
+    creationPolicy: Owner
+    deletionPolicy: Retain
+    templateType: Opaque
+  data:
+  - secretKey: example-username
+    remoteRef:
+      key: apps/example
+      property: username

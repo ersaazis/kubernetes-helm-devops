@@ -1,0 +1,32 @@
+{{- if .Values.vaultStoreApps.enabled }}
+apiVersion: external-secrets.io/v1
+kind: {{ .Values.vaultStoreApps.kind }}
+metadata:
+  name: {{ .Values.vaultStoreApps.name | quote }}
+  {{- if eq .Values.vaultStoreApps.kind "SecretStore" }}
+  namespace: {{ default .Release.Namespace .Values.vaultStoreApps.namespace | quote }}
+  {{- end }}
+  labels:
+    {{- include "externalSecretsWrapper.labels" . | nindent 4 }}
+spec:
+  provider:
+    vault:
+      server: {{ .Values.vaultStoreApps.provider.server | quote }}
+      path: {{ .Values.vaultStoreApps.provider.path | quote }}
+      version: {{ .Values.vaultStoreApps.provider.version | quote }}
+      {{- if .Values.vaultStoreApps.provider.namespace }}
+      namespace: {{ .Values.vaultStoreApps.provider.namespace | quote }}
+      {{- end }}
+      {{- if .Values.vaultStoreApps.provider.caBundle }}
+      caBundle: {{ .Values.vaultStoreApps.provider.caBundle | quote }}
+      {{- end }}
+      auth:
+        kubernetes:
+          mountPath: {{ .Values.vaultStoreApps.auth.kubernetes.mountPath | quote }}
+          role: {{ .Values.vaultStoreApps.auth.kubernetes.role | quote }}
+          serviceAccountRef:
+            name: {{ .Values.vaultStoreApps.auth.kubernetes.serviceAccountRef.name | quote }}
+            {{- if and (eq .Values.vaultStoreApps.kind "ClusterSecretStore") .Values.vaultStoreApps.auth.kubernetes.serviceAccountRef.namespace }}
+            namespace: {{ .Values.vaultStoreApps.auth.kubernetes.serviceAccountRef.namespace | quote }}
+            {{- end }}
+{{- end }}

@@ -1,0 +1,11 @@
+Argo CD project: {{ .Values.argo.project.name }}
+Repo URL: {{ .Values.argo.repoURL }}
+Target revision: {{ .Values.argo.targetRevision }}
+
+Enabled applications:
+{{- range $name := keys .Values.applications | sortAlpha }}
+{{- $app := include "argocd-apps.applicationConfig" (dict "root" $ "app" (index $.Values.applications $name)) | fromYaml }}
+{{- if $app.enabled }}
+- {{ $name }} -> {{ default (include "argocd-apps.normalize" $name) $app.releaseName }}
+{{- end }}
+{{- end }}

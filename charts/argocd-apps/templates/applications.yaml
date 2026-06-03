@@ -1,0 +1,66 @@
+{{- range $name := keys .Values.applications | sortAlpha }}
+{{- $app := include "argocd-apps.applicationConfig" (dict "root" $ "app" (index $.Values.applications $name)) | fromYaml }}
+{{- if $app.enabled }}
+{{- $syncPolicy := mergeOverwrite (deepCopy $.Values.argo.syncPolicy) (default dict $app.syncPolicy) }}
+{{- $ignoreDifferences := concat (default (list) $.Values.argo.defaultIgnoreDifferences) (default (list) $app.ignoreDifferences) }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ default (include "argocd-apps.normalize" $name) $app.name }}
+  namespace: {{ $.Values.argo.namespace }}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    {{- include "argocd-apps.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: application
+    argocd.argoproj.io/application-name: {{ default (include "argocd-apps.normalize" $name) $app.name }}
+    {{- with $app.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    argocd.argoproj.io/sync-wave: {{ $app.syncWave | quote }}
+    {{- with $app.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  project: {{ default $.Values.argo.project.name $app.project }}
+  source:
+    repoURL: {{ $.Values.argo.repoURL | quote }}
+    targetRevision: {{ $.Values.argo.targetRevision | quote }}
+    path: {{ $app.chartPath | quote }}
+    helm:
+      releaseName: {{ default (include "argocd-apps.normalize" $name) $app.releaseName | quote }}
+      valueFiles:
+        {{- toYaml $app.valueFiles | nindent 8 }}
+      ignoreMissingValueFiles: false
+  destination:
+    server: {{ default $.Values.argo.destination.server $app.destinationServer | quote }}
+    namespace: {{ default (include "argocd-apps.normalize" $name) $app.namespace | quote }}
+  syncPolicy:
+    {{- if $syncPolicy.automated.enabled }}
+    automated:
+      prune: {{ $syncPolicy.automated.prune }}
+      selfHeal: {{ $syncPolicy.automated.selfHeal }}
+      allowEmpty: {{ $syncPolicy.automated.allowEmpty }}
+    {{- end }}
+    {{- if $syncPolicy.syncOptions }}
+    syncOptions:
+      {{- toYaml $syncPolicy.syncOptions | nindent 6 }}
+    {{- end }}
+    {{- if $syncPolicy.retry }}
+    retry:
+      limit: {{ $syncPolicy.retry.limit }}
+      backoff:
+        duration: {{ $syncPolicy.retry.backoff.duration | quote }}
+        factor: {{ $syncPolicy.retry.backoff.factor }}
+        maxDuration: {{ $syncPolicy.retry.backoff.maxDuration | quote }}
+    {{- end }}
+  revisionHistoryLimit: {{ $.Values.argo.revisionHistoryLimit }}
+  {{- if $ignoreDifferences }}
+  ignoreDifferences:
+    {{- toYaml $ignoreDifferences | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end }}
+

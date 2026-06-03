@@ -1,0 +1,28 @@
+{{- $eso := index .Values "external-secrets" | default dict -}}
+{{- if .Values.productionChecks.enabled }}
+{{- if not $eso.installCRDs }}
+{{- fail "external-secrets: productionChecks.enabled requires external-secrets.installCRDs=true" }}
+{{- end }}
+{{- if not $eso.createOperator }}
+{{- fail "external-secrets: productionChecks.enabled requires external-secrets.createOperator=true" }}
+{{- end }}
+{{- if not $eso.webhook.create }}
+{{- fail "external-secrets: productionChecks.enabled requires external-secrets.webhook.create=true" }}
+{{- end }}
+{{- if not $eso.certController.create }}
+{{- fail "external-secrets: productionChecks.enabled requires external-secrets.certController.create=true" }}
+{{- end }}
+{{- if .Values.vaultStore.enabled }}
+{{- if not .Values.vaultStore.provider.server }}
+{{- fail "external-secrets: vaultStore.enabled requires vaultStore.provider.server" }}
+{{- end }}
+{{- if not .Values.vaultStore.auth.kubernetes.role }}
+{{- fail "external-secrets: vaultStore.enabled requires vaultStore.auth.kubernetes.role" }}
+{{- end }}
+{{- end }}
+{{- if .Values.externalSecret.enabled }}
+{{- if not .Values.externalSecret.data }}
+{{- fail "external-secrets: externalSecret.enabled requires externalSecret.data" }}
+{{- end }}
+{{- end }}
+{{- end }}

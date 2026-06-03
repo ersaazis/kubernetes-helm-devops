@@ -1,0 +1,23 @@
+{{- if not .Values.argo.repoURL }}
+{{- fail "argocd-apps: argo.repoURL is required" }}
+{{- end }}
+{{- if not .Values.argo.targetRevision }}
+{{- fail "argocd-apps: argo.targetRevision is required" }}
+{{- end }}
+{{- range $name := keys .Values.applications | sortAlpha }}
+{{- $app := include "argocd-apps.applicationConfig" (dict "root" $ "app" (index $.Values.applications $name)) | fromYaml }}
+{{- if $app.enabled }}
+{{- if not $app.chartPath }}
+{{- fail (printf "argocd-apps: applications.%s.chartPath is required" $name) }}
+{{- end }}
+{{- if not $app.valueFiles }}
+{{- fail (printf "argocd-apps: applications.%s.valueFiles must not be empty" $name) }}
+{{- end }}
+{{- range $required := default list $app.requiredValueFiles }}
+{{- if not (has $required $app.valueFiles) }}
+{{- fail (printf "argocd-apps: applications.%s must include required value file %q" $name $required) }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+
