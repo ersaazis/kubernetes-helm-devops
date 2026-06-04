@@ -60,21 +60,6 @@ vaultStoreApps:
         name: external-secrets
         namespace: external-secrets
 
-externalSecret:
-  enabled: false
-  name: app-secret-sync
-  namespace: default
-  refreshInterval: 1h
-  secretStoreRef:
-    name: hcp-vault
-    kind: ClusterSecretStore
-  target:
-    name: app-secret
-    creationPolicy: Owner
-    deletionPolicy: Retain
-    templateType: Opaque
-  data:
-  - secretKey: example-username
-    remoteRef:
-      key: apps/example
-      property: username
+# externalSecret: {} # legacy single-item field, kept for backward compatibility
+# externalSecrets is a list of ExternalSecret resources to create
+externalSecrets: []

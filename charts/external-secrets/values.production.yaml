@@ -64,5 +64,52 @@ vaultStoreApps:
         name: "external-secrets"
         namespace: "external-secrets"
 
-externalSecret:
-  enabled: true
+externalSecrets:
+- name: mysql-8-secret-sync
+  namespace: external-secrets
+  refreshInterval: 1h
+  secretStoreRef:
+    name: databases
+    kind: ClusterSecretStore
+  target:
+    name: mysql-8-secret
+    creationPolicy: Owner
+    deletionPolicy: Retain
+    templateType: Opaque
+  data:
+  - secretKey: password
+    remoteRef:
+      key: mysql-8
+      property: password
+  - secretKey: replication-password
+    remoteRef:
+      key: mysql-8
+      property: replication-password
+  - secretKey: root-password
+    remoteRef:
+      key: mysql-8
+      property: root-password
+- name: mysql-5-7-secret-sync
+  namespace: external-secrets
+  refreshInterval: 1h
+  secretStoreRef:
+    name: databases
+    kind: ClusterSecretStore
+  target:
+    name: mysql-5-7-secret
+    creationPolicy: Owner
+    deletionPolicy: Retain
+    templateType: Opaque
+  data:
+  - secretKey: password
+    remoteRef:
+      key: mysql-5.7
+      property: password
+  - secretKey: replication-password
+    remoteRef:
+      key: mysql-5.7
+      property: replication-password
+  - secretKey: root-password
+    remoteRef:
+      key: mysql-5.7
+      property: root-password
