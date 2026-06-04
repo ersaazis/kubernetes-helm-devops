@@ -1,6 +1,6 @@
 argo:
   namespace: argocd
-  repoURL: 'git@github.com:ersaazis/argocd_apps.git'
+  repoURL: 'git@github.com:ersaazis/kubernetes-helm-devops.git'
   targetRevision: main
   destination:
     server: https://kubernetes.default.svc
