@@ -1,112 +1,71 @@
-# Kubernetes Helm DevOps Config
+# Kubernetes Helm DevOps
 
-Production-oriented Helm configs for platform and DevOps utilities.
+Production-oriented Helm configuration for platform and DevOps components.
 
-## DevOps and Platform Charts
+This repository is intended to be reconciled by Argo CD. The current bootstrap
+flow installs Argo CD first, prepares Vault for Kubernetes authentication, and
+then lets Argo CD manage platform applications from this Git repository.
 
-| Chart | Source | Main values block | Default image policy | Auth policy |
-| --- | --- | --- | --- | --- |
-| `charts/external-secrets` | External Secrets Operator dependency | `external-secrets.*` | `ghcr.io/external-secrets/external-secrets:v2.5.0` | bootstrap sync via `vaultStore.*` + `externalSecret.*` |
+## Repository Layout
 
-### Vault Authentication Setup (Kubernetes Auth Method)
+| Path | Purpose |
+| --- | --- |
+| `charts/external-secrets` | Wrapper chart for External Secrets Operator and Vault `ClusterSecretStore` bootstrap resources. |
+| `charts/argocd-apps` | App-of-apps chart that renders an Argo CD `AppProject` and `Application` resources. |
+| `docs/` | Implementation tutorials and troubleshooting guides. |
+| `scripts/validate-charts.sh` | Local Helm lint/template validation. |
 
-The External Secrets Operator (ESO) uses the Kubernetes Auth Method to authenticate with Vault.
+## Architecture
 
-#### Configuration Steps
+The platform secret flow is:
 
-1. **Enable Kubernetes Auth in Vault**:
-   ```bash
-   vault auth enable kubernetes
-   ```
-
-2. **Configure Vault's Kubernetes Auth Method**:
-   Configure the API host, the CA certificate of the Kubernetes cluster, and disable local CA JWT to use the client token for the TokenReview:
-   ```bash
-   vault write auth/kubernetes/config \
-     kubernetes_host="https://desktop-control-plane:61829" \
-     kubernetes_ca_cert=@/tmp/k8s-ca.crt \
-     disable_local_ca_jwt=true
-   ```
-   > [!NOTE]
-   > The `kubernetes_host` must match a name in the Subject Alternative Name (SAN) list of the Kubernetes API server's certificate. In local Docker Desktop environments, mapping `desktop-control-plane` to the host gateway IP (e.g., `192.168.65.254`) in the Vault container's `/etc/hosts` resolves TLS hostname validation mismatches.
-
-3. **Define a Vault Policy and Role**:
-   Create a read-only policy for database secrets:
-   ```hcl
-   path "databases/data/*" {
-     capabilities = ["read"]
-   }
-   path "databases/metadata/*" {
-     capabilities = ["list", "read"]
-   }
-   ```
-   Write the role binding it to the `external-secrets` ServiceAccount in the `external-secrets` namespace:
-   ```bash
-   vault write auth/kubernetes/role/external-secrets \
-     bound_service_account_names=external-secrets \
-     bound_service_account_namespaces=external-secrets \
-     policies=external-secrets \
-     ttl=1h
-   ```
-
-4. **Grant Auth Delegator Role in Kubernetes**:
-   Grant the `system:auth-delegator` ClusterRole to the `external-secrets` ServiceAccount so that it is authorized to perform TokenReview validation requests:
-   ```yaml
-   apiVersion: rbac.authorization.k8s.io/v1
-   kind: ClusterRoleBinding
-   metadata:
-     name: external-secrets-auth-delegator
-   roleRef:
-     apiGroup: rbac.authorization.k8s.io
-     kind: ClusterRole
-     name: system:auth-delegator
-   subjects:
-   - kind: ServiceAccount
-     name: external-secrets
-     namespace: external-secrets
-   ```
-
-## Argo CD GitOps Chart
-
-`charts/argocd-apps` renders Argo CD resources for this repo in app-of-apps style:
-
-- one `AppProject`
-- one `Application` per deployable chart (1 total)
-
-Sync wave policy in defaults:
-
-- `-10`: `external-secrets`
-
-Install/update example:
-
-```bash
-helm upgrade --install platform-devops-prod charts/argocd-apps \
-  -n argocd \
-  -f charts/argocd-apps/values.production.yaml \
-  -f /path/to/argocd-apps.production.real.yaml \
-  --set argo.repoURL=https://github.com/acme/kubernetes-helm-devops.git \
-  --set argo.targetRevision=main
+```text
+Vault KV v2 -> External Secrets Operator -> Kubernetes Secret -> workloads
 ```
 
-Required real values:
+The GitOps flow is:
 
-- `argo.repoURL`
-- `argo.targetRevision`
+```text
+Git repository -> Argo CD Application -> Helm chart render -> Kubernetes resources
+```
 
-Argo CD overlays in repo (referenced by generated Applications):
+The default Argo CD application in this repo deploys `charts/external-secrets`
+from `git@github.com:ersaazis/kubernetes-helm-devops.git` and uses sync wave
+`-10` so secret infrastructure is reconciled before dependent workloads.
 
-- `charts/external-secrets/values.argocd.production.yaml`
+## Documentation
 
-Production best practices:
+Start here:
 
-- Use immutable `argo.targetRevision` (Git tag or commit SHA), not a moving branch.
-- Keep environment-specific Helm value files in Git and reference them via `applications.<name>.valueFiles`.
-- Keep secrets out of chart values; use External Secrets (`ClusterSecretStore` + `ExternalSecret`) for runtime secret material.
+- [Documentation index](docs/README.md)
+- [Install Argo CD](docs/01-install-argocd.md)
+- [Set up Vault](docs/02-setup-vault.md)
+- [Deploy Argo CD apps](docs/03-deploy-argocd-apps.md)
+- [Verify and troubleshoot](docs/04-verify-troubleshooting.md)
 
 ## Validation
+
+Run chart validation before pushing changes:
 
 ```bash
 ./scripts/validate-charts.sh
 ```
 
-`validate-charts.sh` runs default renders for all charts.
+Useful targeted renders:
+
+```bash
+helm template external-secrets charts/external-secrets \
+  -n external-secrets \
+  -f charts/external-secrets/values.production.yaml \
+  --set external-secrets.installCRDs=false
+
+helm template platform-devops-prod charts/argocd-apps \
+  -n argocd \
+  -f charts/argocd-apps/values.production.yaml
+```
+
+## Secret Handling
+
+Do not commit Vault tokens, Kubernetes service account JWTs, private keys, or
+raw application secrets. Keep runtime secret material in Vault and expose it to
+Kubernetes through External Secrets.
