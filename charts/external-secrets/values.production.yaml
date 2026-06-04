@@ -65,4 +65,4 @@ vaultStoreApps:
         namespace: "external-secrets"
 
 externalSecret:
-  enabled: false
+  enabled: true
