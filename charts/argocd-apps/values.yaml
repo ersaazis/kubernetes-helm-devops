@@ -9,20 +9,18 @@ argo:
     description: Production GitOps project for kubernetes-helm-config.
     sourceRepos: []
     additionalDestinations:
+:    - server: https://kubernetes.default.svc
+      namespace: database-mongodb-7
     - server: https://kubernetes.default.svc
-      namespace: databases
+      namespace: database-mysql-5-1-legacy
     - server: https://kubernetes.default.svc
-      namespace: mongodb-7
+      namespace: database-mysql-5-7
     - server: https://kubernetes.default.svc
-      namespace: mysql-5-1-legacy
+      namespace: database-mysql-8
     - server: https://kubernetes.default.svc
-      namespace: mysql-5-7
+      namespace: database-postgresql-16
     - server: https://kubernetes.default.svc
-      namespace: mysql-8
-    - server: https://kubernetes.default.svc
-      namespace: postgresql-16
-    - server: https://kubernetes.default.svc
-      namespace: redis
+      namespace: database-redis
     clusterResourceWhitelist:
     - group: '*'
       kind: '*'
