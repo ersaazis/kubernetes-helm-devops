@@ -9,6 +9,7 @@ graphify-out/
 ._*
 .Spotlight-V100
 .Trashes
+.graphify_*
 ehthumbs.db
 Thumbs.db
 GEMINI.md
