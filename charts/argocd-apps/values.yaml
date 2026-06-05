@@ -16,6 +16,10 @@ argo:
     - server: https://kubernetes.default.svc
       namespace: mysql-5-1-legacy
     - server: https://kubernetes.default.svc
+      namespace: mysql-5-7
+    - server: https://kubernetes.default.svc
+      namespace: mysql-8
+    - server: https://kubernetes.default.svc
       namespace: postgresql-16
     - server: https://kubernetes.default.svc
       namespace: redis
