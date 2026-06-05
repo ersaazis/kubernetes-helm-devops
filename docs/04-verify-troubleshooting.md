@@ -193,6 +193,21 @@ kubectl -n external-secrets run tmp-shell --rm -it --image=curlimages/curl:lates
 
 Pastikan server Vault diisi dengan URL yang reachable dari dalam cluster, bukan `localhost`.
 
+---
+
+**Bitnami MySQL (Legacy) CrashLoopBackOff Exit 1**
+
+Error di logs (langsung crash setelah inisialisasi awal tanpa error jelas):
+```text
+[INFO] ==> ** MySQL setup finished! **
+...
+[Note] /opt/bitnami/mysql/bin/mysqld: Shutdown complete
+```
+
+Penyebab: Pod dijalankan sebagai `root` (`runAsUser: 0`), sementara image Bitnami MySQL akan melepaskan hak akses root menggunakan `gosu` ke `uid 1001`. Memaksakan root pada container ini mengganggu setup ownership file internal, mengakibatkan exit setelah fase setup.
+
+Solusi: Pastikan security context container tidak di-override dengan `runAsUser: 0` pada environment production dan mengembalikan template `StatefulSet` untuk menggunakan setup Bitnami (`runAsUser: 1001`).
+
 ## Validasi Chart Lokal
 
 Jalankan script validasi sebelum push ke Git:
