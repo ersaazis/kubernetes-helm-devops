@@ -2,12 +2,12 @@ productionChecks:
   enabled: false
 
 namespaces:
-- mongodb-7
-- mysql-8
-- mysql-5-7
-- mysql-5-1-legacy
-- postgresql-16
-- redis
+- database-mongodb-7
+- database-mysql-8
+- database-mysql-5-7
+- database-mysql-5-1-legacy
+- database-postgresql-16
+- database-redis
 
 external-secrets:
   installCRDs: false
@@ -74,7 +74,7 @@ vaultStoreApps:
 
 externalSecrets:
 - name: mongodb-7-secret-sync
-  namespace: mongodb-7
+  namespace: database-mongodb-7
   refreshInterval: 15m
   secretStoreRef:
     name: databases
@@ -102,7 +102,7 @@ externalSecrets:
       key: mongodb-7
       property: replica-set-key
 - name: mysql-51-secret-sync
-  namespace: mysql-5-1-legacy
+  namespace: database-mysql-5-1-legacy
   refreshInterval: 15m
   secretStoreRef:
     name: databases
@@ -122,7 +122,7 @@ externalSecrets:
       key: mysql-5.1
       property: password
 - name: redis-secret-sync
-  namespace: redis
+  namespace: database-redis
   refreshInterval: 15m
   secretStoreRef:
     name: databases
@@ -138,7 +138,7 @@ externalSecrets:
       key: redis
       property: password
 - name: postgresql-16-secret-sync
-  namespace: postgresql-16
+  namespace: database-postgresql-16
   refreshInterval: 15m
   secretStoreRef:
     name: databases
@@ -166,7 +166,7 @@ externalSecrets:
       key: postgresql-16
       property: metrics-password
 - name: mysql-8-secret-sync
-  namespace: mysql-8
+  namespace: database-mysql-8
   refreshInterval: 15m
   secretStoreRef:
     name: databases
@@ -190,7 +190,7 @@ externalSecrets:
       key: mysql-8
       property: root-password
 - name: mysql-5-7-secret-sync
-  namespace: mysql-5-7
+  namespace: database-mysql-5-7
   refreshInterval: 15m
   secretStoreRef:
     name: databases
