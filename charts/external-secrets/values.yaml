@@ -1,5 +1,6 @@
 global:
   defaultNamespace: external-secrets
+namespaces: []
 productionChecks:
   enabled: false
 external-secrets:

@@ -8,7 +8,17 @@ argo:
     name: platform-prod
     description: Production GitOps project for kubernetes-helm-config.
     sourceRepos: []
-    additionalDestinations: []
+    additionalDestinations:
+    - server: https://kubernetes.default.svc
+      namespace: databases
+    - server: https://kubernetes.default.svc
+      namespace: mongodb-7
+    - server: https://kubernetes.default.svc
+      namespace: mysql-5-1-legacy
+    - server: https://kubernetes.default.svc
+      namespace: postgresql-16
+    - server: https://kubernetes.default.svc
+      namespace: redis
     clusterResourceWhitelist:
     - group: '*'
       kind: '*'
@@ -62,12 +72,14 @@ applications:
     chartPath: charts/external-secrets
     namespace: external-secrets
     syncWave: '-10'
+    ignoreDifferences:
+    - group: external-secrets.io
+      kind: ExternalSecret
+      jsonPointers:
+      - /metadata/annotations/force-sync
     valueFiles:
     - values.production.yaml
     - values.argocd.production.yaml
     requiredValueFiles:
     - values.production.yaml
     - values.argocd.production.yaml
-
-
-

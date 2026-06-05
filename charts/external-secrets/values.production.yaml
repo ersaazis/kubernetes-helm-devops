@@ -1,6 +1,14 @@
 productionChecks:
   enabled: false
 
+namespaces:
+- mongodb-7
+- mysql-8
+- mysql-5-7
+- mysql-5-1-legacy
+- postgresql-16
+- redis
+
 external-secrets:
   installCRDs: false
   leaderElect: true
@@ -65,9 +73,101 @@ vaultStoreApps:
         namespace: "external-secrets"
 
 externalSecrets:
+- name: mongodb-7-secret-sync
+  namespace: mongodb-7
+  refreshInterval: 15m
+  secretStoreRef:
+    name: databases
+    kind: ClusterSecretStore
+  target:
+    name: mongodb-7-secret
+    creationPolicy: Owner
+    deletionPolicy: Retain
+    templateType: Opaque
+  data:
+  - secretKey: mongodb-root-password
+    remoteRef:
+      key: mongodb-7
+      property: root-password
+  - secretKey: mongodb-passwords
+    remoteRef:
+      key: mongodb-7
+      property: password
+  - secretKey: mongodb-metrics-password
+    remoteRef:
+      key: mongodb-7
+      property: metrics-password
+  - secretKey: mongodb-replica-set-key
+    remoteRef:
+      key: mongodb-7
+      property: replica-set-key
+- name: mysql-51-secret-sync
+  namespace: mysql-5-1-legacy
+  refreshInterval: 15m
+  secretStoreRef:
+    name: databases
+    kind: ClusterSecretStore
+  target:
+    name: mysql-51-secret
+    creationPolicy: Owner
+    deletionPolicy: Retain
+    templateType: Opaque
+  data:
+  - secretKey: mysql-root-password
+    remoteRef:
+      key: mysql-5.1
+      property: root-password
+  - secretKey: mysql-password
+    remoteRef:
+      key: mysql-5.1
+      property: password
+- name: redis-secret-sync
+  namespace: redis
+  refreshInterval: 15m
+  secretStoreRef:
+    name: databases
+    kind: ClusterSecretStore
+  target:
+    name: redis-secret
+    creationPolicy: Owner
+    deletionPolicy: Retain
+    templateType: Opaque
+  data:
+  - secretKey: redis-password
+    remoteRef:
+      key: redis
+      property: password
+- name: postgresql-16-secret-sync
+  namespace: postgresql-16
+  refreshInterval: 15m
+  secretStoreRef:
+    name: databases
+    kind: ClusterSecretStore
+  target:
+    name: postgresql-16-secret
+    creationPolicy: Owner
+    deletionPolicy: Retain
+    templateType: Opaque
+  data:
+  - secretKey: postgres-password
+    remoteRef:
+      key: postgresql-16
+      property: postgres-password
+  - secretKey: password
+    remoteRef:
+      key: postgresql-16
+      property: password
+  - secretKey: replication-password
+    remoteRef:
+      key: postgresql-16
+      property: replication-password
+  - secretKey: metrics-password
+    remoteRef:
+      key: postgresql-16
+      property: metrics-password
 - name: mysql-8-secret-sync
-  namespace: external-secrets
-  refreshInterval: 1h
+  namespace: mysql-8
+  refreshInterval: 15m
   secretStoreRef:
     name: databases
     kind: ClusterSecretStore
@@ -90,8 +190,8 @@ externalSecrets:
       key: mysql-8
       property: root-password
 - name: mysql-5-7-secret-sync
-  namespace: external-secrets
-  refreshInterval: 1h
+  namespace: mysql-5-7
+  refreshInterval: 15m
   secretStoreRef:
     name: databases
     kind: ClusterSecretStore

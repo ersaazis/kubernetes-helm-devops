@@ -1,0 +1,11 @@
+{{- range .Values.namespaces }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ . | quote }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+  labels:
+    {{- include "externalSecretsWrapper.labels" $ | nindent 4 }}
+{{- end }}
