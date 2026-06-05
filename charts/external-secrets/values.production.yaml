@@ -85,22 +85,22 @@ externalSecrets:
     deletionPolicy: Retain
     templateType: Opaque
   data:
-  - secretKey: root-password
+  - secretKey: mongodb-root-password
     remoteRef:
       key: mongodb-7
-      property: root-password
-  - secretKey: password
+      property: mongodb-root-password
+  - secretKey: mongodb-passwords
     remoteRef:
       key: mongodb-7
-      property: password
-  - secretKey: metrics-password
+      property: mongodb-passwords
+  - secretKey: mongodb-metrics-password
     remoteRef:
       key: mongodb-7
-      property: metrics-password
-  - secretKey: replica-set-key
+      property: mongodb-metrics-password
+  - secretKey: mongodb-replica-set-key
     remoteRef:
       key: mongodb-7
-      property: replica-set-key
+      property: mongodb-replica-set-key
 - name: mysql-51-secret-sync
   namespace: database-mysql-5-1-legacy
   refreshInterval: 15m
@@ -177,18 +177,18 @@ externalSecrets:
     deletionPolicy: Retain
     templateType: Opaque
   data:
-  - secretKey: password
+  - secretKey: mysql-password
     remoteRef:
       key: mysql-8
-      property: password
-  - secretKey: replication-password
+      property: mysql-password
+  - secretKey: mysql-replication-password
     remoteRef:
       key: mysql-8
-      property: replication-password
-  - secretKey: root-password
+      property: mysql-replication-password
+  - secretKey: mysql-root-password
     remoteRef:
       key: mysql-8
-      property: root-password
+      property: mysql-root-password
 - name: mysql-5-7-secret-sync
   namespace: database-mysql-5-7
   refreshInterval: 15m
@@ -201,15 +201,15 @@ externalSecrets:
     deletionPolicy: Retain
     templateType: Opaque
   data:
-  - secretKey: password
+  - secretKey: mysql-password
     remoteRef:
       key: mysql-5.7
-      property: password
-  - secretKey: replication-password
+      property: mysql-password
+  - secretKey: mysql-replication-password
     remoteRef:
       key: mysql-5.7
-      property: replication-password
-  - secretKey: root-password
+      property: mysql-replication-password
+  - secretKey: mysql-root-password
     remoteRef:
       key: mysql-5.7
-      property: root-password
+      property: mysql-root-password
