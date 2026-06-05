@@ -85,19 +85,19 @@ externalSecrets:
     deletionPolicy: Retain
     templateType: Opaque
   data:
-  - secretKey: mongodb-root-password
+  - secretKey: root-password
     remoteRef:
       key: mongodb-7
       property: root-password
-  - secretKey: mongodb-passwords
+  - secretKey: password
     remoteRef:
       key: mongodb-7
       property: password
-  - secretKey: mongodb-metrics-password
+  - secretKey: metrics-password
     remoteRef:
       key: mongodb-7
       property: metrics-password
-  - secretKey: mongodb-replica-set-key
+  - secretKey: replica-set-key
     remoteRef:
       key: mongodb-7
       property: replica-set-key
@@ -113,11 +113,11 @@ externalSecrets:
     deletionPolicy: Retain
     templateType: Opaque
   data:
-  - secretKey: mysql-root-password
+  - secretKey: root-password
     remoteRef:
       key: mysql-5.1
       property: root-password
-  - secretKey: mysql-password
+  - secretKey: password
     remoteRef:
       key: mysql-5.1
       property: password
@@ -133,7 +133,7 @@ externalSecrets:
     deletionPolicy: Retain
     templateType: Opaque
   data:
-  - secretKey: redis-password
+  - secretKey: password
     remoteRef:
       key: redis
       property: password
