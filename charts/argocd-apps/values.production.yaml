@@ -1,5 +1,5 @@
 argo:
   project:
-    name: platform-prod
+    name: project-kubernetes-helm-devops
     description: Production GitOps project for kubernetes-helm-config.
 

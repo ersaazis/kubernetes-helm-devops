@@ -59,7 +59,7 @@ helm template external-secrets charts/external-secrets \
   -f charts/external-secrets/values.production.yaml \
   --set external-secrets.installCRDs=false
 
-helm template platform-devops-prod charts/argocd-apps \
+helm template kubernetes-helm-devops charts/argocd-apps \
   -n argocd \
   -f charts/argocd-apps/values.production.yaml
 ```

@@ -15,6 +15,8 @@ export K8S_AUTH_PATH=kubernetes-local
 
 Jangan commit nilai `VAULT_TOKEN`.
 
+Untuk lab lokal dengan compose Vault di `/home/ersaa/kubernetes/docker-compose-config/vault-local`, root token biasanya tersimpan di file `.secret` hasil init Vault. File itu rahasia dan tidak boleh dicommit atau dishare. Helper `config-vault.sh` di folder compose tersebut harus memakai auth path yang sama dengan chart ini, yaitu `kubernetes-local`.
+
 Jika Vault CLI hanya tersedia di container, masuk dulu:
 
 ```bash
@@ -81,6 +83,8 @@ vault write "auth/$K8S_AUTH_PATH/config" \
   token_reviewer_jwt=@/tmp/vault-token-reviewer.jwt \
   disable_local_ca_jwt=false
 ```
+
+Pastikan path config adalah `auth/kubernetes-local/config`. Config lama di `auth/kubernetes/config` tidak dipakai oleh `ClusterSecretStore` repo ini karena Helm values mengarah ke `mountPath: kubernetes-local`.
 
 Expected check:
 
@@ -162,6 +166,22 @@ curl -sk --request POST \
 ```
 
 Berhasil jika response berisi `client_token`.
+
+Cek status ESO setelah login valid:
+
+```bash
+kubectl get clustersecretstore databases prohukum-apps
+kubectl get externalsecret -A
+```
+
+Expected:
+
+```text
+databases       ...   Valid   ...   True
+prohukum-apps   ...   Valid   ...   True
+
+...   SecretSynced
+```
 
 ## Catatan CA
 

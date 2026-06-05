@@ -55,7 +55,7 @@ Setelah CRD tersedia, Argo CD dapat mensync chart `external-secrets` dengan `ext
 Install root chart menggunakan Helm:
 
 ```bash
-helm upgrade --install platform-devops-prod charts/argocd-apps \
+helm upgrade --install kubernetes-helm-devops charts/argocd-apps \
   -n argocd \
   -f charts/argocd-apps/values.production.yaml
 ```

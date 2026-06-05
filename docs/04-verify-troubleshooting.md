@@ -43,6 +43,8 @@ Code: 403
 
 Penyebab umum:
 - Path auth yang dikonfigurasi di Vault config tidak cocok dengan `vaultStore.auth.kubernetes.mountPath` di Helm.
+- Auth lama masih di `auth/kubernetes`, sementara chart repo ini memakai `auth/kubernetes-local`.
+- Reviewer service account atau binding `system:auth-delegator` belum ada: `external-secrets/vault-token-reviewer` dan `vault-token-reviewer-auth-delegator`.
 - Field `token_reviewer_jwt_set: false` — Vault tidak bisa verify TokenReview ke Kubernetes API. Set `token_reviewer_jwt` secara eksplisit (lihat [Setup Vault](02-setup-vault.md) langkah 4).
 - `audience` di Vault role tidak kosong tetapi audience token actual berbeda. Untuk Docker Desktop, token audience adalah `https://kubernetes.default.svc.cluster.local` bukan string `vault`.
 
@@ -65,6 +67,14 @@ curl -sk --request POST \
 
 Berhasil jika ada `client_token` di response.
 
+Perbaikan cepat: ulangi [Setup Vault](02-setup-vault.md) langkah 3-7. Setelah itu trigger ulang reconcile ESO:
+
+```bash
+kubectl annotate clustersecretstore databases force-sync="$(date +%s)" --overwrite
+kubectl annotate clustersecretstore prohukum-apps force-sync="$(date +%s)" --overwrite
+kubectl -n external-secrets rollout restart deployment/external-secrets
+```
+
 ---
 
 **CRD exists and cannot be imported**
@@ -85,6 +95,41 @@ helm upgrade --install external-secrets charts/external-secrets \
 ```
 
 CRD sudah ada di cluster; chart hanya perlu deploy operator dan bootstrap resources.
+
+---
+
+**Helm uninstall stuck atau invalid ownership metadata**
+
+Error saat install/upgrade root chart:
+
+```text
+invalid ownership metadata; annotation validation error: key "meta.helm.sh/release-name" must equal...
+```
+
+Jika release lama sudah dihapus tetapi `Application` Argo CD masih `Terminating`, biasanya finalizer Argo CD tersangkut karena `AppProject` sudah ikut terhapus. Cek:
+
+```bash
+helm list -n argocd -a
+kubectl -n argocd get application -o custom-columns=NAME:.metadata.name,DEL:.metadata.deletionTimestamp,FINALIZERS:.metadata.finalizers
+kubectl -n argocd get appproject
+```
+
+Lepas finalizer pada `Application` yang stuck:
+
+```bash
+kubectl -n argocd patch application external-secrets \
+  --type=json \
+  -p='[{"op":"remove","path":"/metadata/finalizers"}]'
+```
+
+Install ulang root chart dan ambil alih resource existing:
+
+```bash
+helm upgrade --install kubernetes-helm-devops charts/argocd-apps \
+  -n argocd \
+  -f charts/argocd-apps/values.production.yaml \
+  --take-ownership
+```
 
 ---
 
@@ -164,7 +209,7 @@ helm template external-secrets charts/external-secrets \
   -f charts/external-secrets/values.production.yaml \
   --set external-secrets.installCRDs=false
 
-helm template platform-devops-prod charts/argocd-apps \
+helm template kubernetes-helm-devops charts/argocd-apps \
   -n argocd \
   -f charts/argocd-apps/values.production.yaml
 ```
